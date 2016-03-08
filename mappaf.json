@@ -1,0 +1,33 @@
+{
+    "type": "FeatureCollection",
+    "features": [
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    13.357354625,
+                    38.120969735
+                ]
+            },
+            "properties": {
+                "name": "PIAZZA VERDI",
+                "id": "s-sqc2zgww8z-piazzaverdi"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    13.35638,
+                    38.120918335
+                ]
+            },
+            "properties": {
+                "name": "PIGNATELLI ARAGONA",
+                "id": "s-sqc2zgty6n-pignatelliaragona"
+            }
+        }
+    ]
+}

@@ -20,7 +20,7 @@ function geoJson ($locales)
         return json_encode($allfeatures, JSON_PRETTY_PRINT);
 
     }
-$url = 'https://transit.land/api/v1/stops?lon='.$lon.'&lat='.$lat.'&r='.$r;
+$url = 'https://transit.land/api/v1/stops?lon='.$lon.'&lat='.$lat.'&r='.$r."&per_page=200";
 $file = "mappa.json";
 
 $src = fopen($url, 'r');
@@ -50,10 +50,13 @@ fputs($dest1, $geostring);
   <link rel="stylesheet" href="http://necolas.github.io/normalize.css/2.1.3/normalize.css" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=no">
   <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.5/leaflet.css" />
+   <link rel="stylesheet" href="http://turbo87.github.io/leaflet-sidebar/src/L.Control.Sidebar.css" />
+   <link href="https://fonts.googleapis.com/css?family=Titillium+Web" rel="stylesheet" type="text/css">
         <link rel="stylesheet" href="MarkerCluster.css" />
         <link rel="stylesheet" href="MarkerCluster.Default.css" />
         <meta property="og:image" content="http://www.piersoft.it/panarotre/bus_.png"/>
   <script src="http://cdn.leafletjs.com/leaflet-0.7.5/leaflet.js"></script>
+<script src="http://turbo87.github.io/leaflet-sidebar/src/L.Control.Sidebar.js"></script>
    <script src="leaflet.markercluster.js"></script>
 <script type="text/javascript">
 
@@ -67,11 +70,12 @@ function microAjax(B,A){this.bindFunction=function(E,D){return function(){return
         right:0;
         left:0;
         bottom:0;
+        font-family: Titillium Web, Arial, Sans-Serif;
 }
 #infodiv{
 background-color: rgba(255, 255, 255, 0.95);
 
-font-family: Helvetica, Arial, Sans-Serif;
+font-family: Titillium Web, Arial, Sans-Serif;
 padding: 2px;
 
 
@@ -89,7 +93,7 @@ overflow-x: hidden;
 }
 #loader {
     position:absolute; top:0; bottom:0; width:100%;
-    background:rgba(255, 255, 255, 1);
+    background:rgba(255, 255, 255, 0.9);
     transition:background 1s ease-out;
     -webkit-transition:background 1s ease-out;
 
@@ -110,6 +114,11 @@ p.pic {
     margin-right: auto;
     margin-left: 18px;
 }
+
+        .lorem {
+            font-style: Titillium Web;
+            color: #AAA;
+        }
 </style>
   </head>
 
@@ -118,19 +127,36 @@ p.pic {
   <div data-tap-disabled="true">
 
  <div id="mapdiv"></div>
+ <div id="sidebar">
+
+</div>
 <div id="infodiv" style="leaflet-popup-content-wrapper">
-  <p><b>Trasporti Palermo-Napoli-Roma-Trento (fermate nelle vicinanze di <?php echo $r."mt"; ?>)<br></b>
+  <p><b>Trasporti Palermo-Napoli-Roma-Trento (Massimo 200 fermate nelle vicinanze di <?php echo $r."mt"; ?>)<br></b>
   Mappa con fermate, linee e orarie dei Bus delle aziende TPL di Napoli, Palermo, Roma, Trento by @piersoft. Fonte dati e licenze: <a href="http://blog.spaziogis.it/2016/03/02/transiland-per-mettere-insieme-e-dare-vita-ai-dati-sui-trasporti/">Transitland, per mettere insieme e "dare vita" ai dati sui trasporti</a></p>
 </div>
 <div id='loader'><span class='message'>loading<p class="pic"><img src="http://www.piersoft.it/panarotre/ajax-loader.gif"></p></span></div>
 </div>
+<script type="text/javascript">
+var urlj="";
+var corse=0;
+function MostrarVideo(idYouTube)
+{
+  sidebar.show();
+
+var contenedor = document.getElementById('sidebar');
+if(idYouTube == '')
+{contenedor.innerHTML = '';
+} else{
+var url = urlj;
+contenedor.innerHTML = '<iframe width="100%" height="600" src="orari.php?id='+ url +'" frameborder="0" allowfullscreen></iframe>';
+var element = document.getElementById("infodiv");
+if (element !=null) element.parentNode.removeChild(element);
+}
+finishedLoadinglong(corse);
+}
+</script>
 <script language="javascript" type="text/javascript">
 <!--
-function popitup(url) {
-	newwindow=window.open(url,'name','height=200,width=150');
-	if (window.focus) {newwindow.focus()}
-	return false;
-}
 
 // -->
 </script>
@@ -165,6 +191,13 @@ function popitup(url) {
     "Mapquest Open": mapquest,
     "RealVista": realvista
         };
+
+    var sidebar = L.control.sidebar('sidebar', {
+          closeButton: true,
+          position: 'left'
+      });
+      map.addControl(sidebar);
+
         L.control.layers(baseMaps).addTo(map);
         var markeryou = L.marker([parseFloat('<?php printf($_GET['lat']); ?>'), parseFloat('<?php printf($_GET['lon']); ?>')]).addTo(map);
         markeryou.bindPopup("<b>Sei qui</b>");
@@ -256,9 +289,11 @@ if(feat['routes_serving_stop'].length != "undefined")
   marker.layer.openPopup();
   console.log("non ci sono linee");
 }else{
-
-  text ="<b>"+jsonref.properties.name+"</b></br> <a href='orari.php?id="+jsonref.properties.id+"' onClick='startLoading();'>Clicca per orari</a></br>Linee: <b>";
+  corse=feat['routes_serving_stop'].length;
+urlj=jsonref.properties.id;
+  text ="<b>"+jsonref.properties.name+"</b></br><a href='#' onClick='startLoading();MostrarVideo();finishedLoadinglong(corse);'>Clicca per orari</a></br>Linee: <b>";
 console.log("Feat lenght: "+feat['routes_serving_stop'].length);
+
 //for (i=0;i<feat['schedule_stop_pairs'].length;i++){
  for (i=0;i<feat['routes_serving_stop'].length;i++){
 
@@ -285,6 +320,33 @@ function startLoading() {
     loader.className = '';
 }
 
+function finishedLoadinglong(corse) {
+    // first, toggle the class 'done', which makes the loading screen
+    // fade out
+    loader.className = 'done';
+    if (corse >= 9){
+    setTimeout(function() {
+
+        loader.className = 'hide';
+    }, 15000);
+    }
+    else if (corse >= 5){
+    setTimeout(function() {
+
+        loader.className = 'hide';
+    }, 9000);
+  }else if (corse >= 3){
+    setTimeout(function() {
+
+        loader.className = 'hide';
+    }, 5000);
+  }else{
+    setTimeout(function() {
+
+        loader.className = 'hide';
+    }, 3000);
+  }
+}
 function finishedLoading() {
     // first, toggle the class 'done', which makes the loading screen
     // fade out
@@ -296,6 +358,26 @@ function finishedLoading() {
         loader.className = 'hide';
     }, 500);
 }
+      sidebar.on('show', function () {
+          console.log('Sidebar will be visible.');
+      });
+
+      sidebar.on('shown', function () {
+          console.log('Sidebar is visible.');
+      });
+
+      sidebar.on('hide', function () {
+          console.log('Sidebar will be hidden.');
+      });
+
+      sidebar.on('hidden', function () {
+          console.log('Sidebar is hidden.');
+      });
+
+      L.DomEvent.on(sidebar.getCloseButton(), 'click', function () {
+          console.log('Close button clicked.');
+          location.reload();
+      });
 </script>
 
 </body>

@@ -62,6 +62,7 @@ function start($telegram,$update)
 		}elseif (strpos($text,'/') !== false ){
 
 		$text=str_replace("/","",$text);
+		$text=str_replace("___","<",$text);
 		$text=str_replace("__","~",$text);
 		$text=str_replace("_","-",$text);
 
@@ -73,7 +74,7 @@ function start($telegram,$update)
 		$parsed_json = json_decode($json_string);
 		$count = 0;
 		$countl = 0;
-
+		$namedest=$parsed_json->{'name'};
 		$IdFermata="";
 
 		foreach($parsed_json->{'routes_serving_stop'} as $data=>$csv1){
@@ -108,6 +109,10 @@ function start($telegram,$update)
 
 		//echo $countl;
   $distanza=[];
+	$json_string2 = file_get_contents("https://transit.land/api/v1/onestop_id/".$parsed_json1->{'schedule_stop_pairs'}[$i]->{'origin_onestop_id'});
+	$parsed_json2 = json_decode($json_string2);
+	$name=$parsed_json2->{'name'};
+
 	for ($l=0;$l<$countl;$l++)
 		{
 		//	if ( ($parsed_json1->{'schedule_stop_pairs'}[$l]->{'route_onestop_id'}) == $parsed_json->{'routes_serving_stop'}[$i]->{'route_onestop_id'})
@@ -124,8 +129,8 @@ function start($telegram,$update)
 					$temp_c1 .="Linea: ".$parsed_json->{'routes_serving_stop'}[$i]->{'route_name'}." arrivo: ";
 
 		  //    $temp_c1 .=$parsed_json1->{'schedule_stop_pairs'}[$l]->{'destination_arrival_time'};
- 					$temp_c1 .=$distanza[$l]['orari'];
-		      $temp_c1 .="\n";
+			$temp_c1 .=$distanza[$l]['orari']."\nproveniente da: ".$name;
+		  $temp_c1 .="\n";
 
 		      }
 
@@ -133,7 +138,7 @@ function start($telegram,$update)
 		}
 
 if ($start==1){
-	$content = array('chat_id' => $chat_id, 'text' => "Linee in arrivo nella prossima ora:",'disable_web_page_preview'=>true);
+	$content = array('chat_id' => $chat_id, 'text' => "Linee in arrivo nella prossima ora a ".$namedest."\n",'disable_web_page_preview'=>true);
 	$telegram->sendMessage($content);
 }
 	$chunks = str_split($temp_c1, self::MAX_LENGTH);
@@ -167,9 +172,9 @@ if ($start==1){
 
 
 
-$forcehide=$telegram->buildKeyBoardHide(true);
-$content = array('chat_id' => $chat_id, 'text' => "Comando errato.\nInvia la tua posizione cliccando sulla graffetta (📎) in basso e, se vuoi, puoi cliccare due volte sulla mappa e spostare il Pin Rosso in un luogo di cui vuoi conoscere le fermate più vicine. Risposta entro 60 secondi.", 'reply_markup' =>$forcehide);
-$telegram->sendMessage($content);
+			$forcehide=$telegram->buildKeyBoardHide(true);
+			$content = array('chat_id' => $chat_id, 'text' => "Comando errato.\nInvia la tua posizione cliccando sulla graffetta (📎) in basso e, se vuoi, puoi cliccare due volte sulla mappa e spostare il Pin Rosso in un luogo di cui vuoi conoscere le fermate più vicine. Risposta entro 60 secondi.", 'reply_markup' =>$forcehide);
+			$telegram->sendMessage($content);
 			$this->create_keyboard($telegram,$chat_id);
 			exit;
 
@@ -231,6 +236,9 @@ function location_manager($db,$telegram,$user_id,$chat_id,$location)
 
 						$onestop=str_replace("-","_",$parsed_json->{'stops'}[$i]->{'onestop_id'});
 						$onestop=str_replace("~","__",	$onestop);
+						$onestop=str_replace("<","___",	$onestop);
+
+
 			      //  echo $countl[$i];
 			  $temp_c1 .="\n";
 			      $temp_c1 .="Fermata: ".$parsed_json->{'stops'}[$i]->{'name'};
@@ -252,7 +260,7 @@ function location_manager($db,$telegram,$user_id,$chat_id,$location)
 
  }
 
-
+if ($count >0){
 
 	$reply="Se vuoi vedere queste fermate su una mappa clicca qui:\n";
 	$reply .="http://www.piersoft.it/panarotre/locator.php?lon=".$lng."&lat=".$lat."&r=500";
@@ -262,7 +270,10 @@ function location_manager($db,$telegram,$user_id,$chat_id,$location)
 	$forcehide=$telegram->buildKeyBoardHide(true);
 	$content = array('chat_id' => $chat_id, 'text' => "oppure clicca su ID Fermata per gli orari", 'reply_markup' =>$forcehide);
 	$telegram->sendMessage($content);
-
+}else{
+	$content = array('chat_id' => $chat_id, 'text' => "Non ci sono fermate gestite", 'reply_markup' =>$forcehide,'disable_web_page_preview'=>true);
+	$telegram->sendMessage($content);
+}
 	$today = date("Y-m-d H:i:s");
 
 	$log=$today. ",fermatelocation sent," .$chat_id. "\n";

@@ -8,7 +8,7 @@ $text=$_GET["id"];
 $text1=$_GET["route"];
 include("getting.php");
 
-//$text="s-sr607cdc2c-rivieradichiaia164";
+$text="s-sr607cdc2c-rivieradichiaia164";
 //$text1="r-s-151";
 $data=new getdata();
 
@@ -33,7 +33,8 @@ foreach($parsed_json->{'routes_serving_stop'} as $data=>$csv1){
 
 $countl=0;
  $countl2=0;
-$json_string1 = file_get_contents("https://transit.land/api/v1/schedule_stop_pairs?destination_onestop_id=".$text."&origin_departure_between=".$ora.",".$ora2);
+$json_string1 = file_get_contents("https://transit.land/api/v1/schedule_stop_pairs?destination_onestop_id=".$text);
+//."&origin_departure_between=".$ora.",".$ora2);
 //echo $json_string1;
 $parsed_json1 = json_decode($json_string1);
 
@@ -45,6 +46,7 @@ foreach($parsed_json1->{'schedule_stop_pairs'} as $data12=>$csv11){
 
 $start=0;
 if ($countl == 0){
+  echo "Non ci sono arrivi nella prossima ora";
 
 }else{
     $start=1;
@@ -73,7 +75,7 @@ for ($l=0;$l<$countl;$l++)
       $temp_c1 .="Linea: <b>".$parsed_json->{'routes_serving_stop'}[$i]->{'route_name'}."</b> arrivo: <b>";
 
     //  $temp_c1 .=$parsed_json1->{'schedule_stop_pairs'}[$l]->{'destination_arrival_time'};
-    $temp_c1 .=$distanza[$l]['orari']."</b>\n<br>proveniente da: ".$name;
+    $temp_c1 .=$distanza[$l]['orari']."</b> proveniente da: ".$name;
       $temp_c1 .="</br>";
 
       }
@@ -82,13 +84,10 @@ for ($l=0;$l<$countl;$l++)
 }
 
 if ( $start==1){
-echo "<font face='verdana'>Linee in arrivo nella prossima ora a <b>".$namedest."</b>\n<br>";
-}else{
-  echo "<font face='verdana'>Non ci sono arrivi nella prossima ora";
-
+echo "Linee in arrivo nella prossima ora a \n</br>".$namedest."\n<br>";
 }
 
-echo "\n<br><font face='verdana'>".$temp_c1;
+echo "<font face='verdana'>".$temp_c1;
 
 
 

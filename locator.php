@@ -3,6 +3,15 @@ $lat=$_GET["lat"];
 $lon=$_GET["lon"];
 $r=$_GET["r"];
 
+$urlr = 'https://transit.land/api/v1/routes.geojson?bbox='.floatval($lon-0.005).','.floatval($lat-0.005).','.floatval($lon+0.005).','.floatval($lat+0.005);
+$filer = "mappafr.json";
+
+$srcr = fopen($urlr, 'r');
+$destr = fopen($filer, 'w');
+stream_copy_to_stream($srcr, $destr);
+
+
+
 function geoJson ($locales)
     {
         $original_data = json_decode($locales, true);
@@ -61,6 +70,7 @@ fputs($dest1, $geostring);
 <script type="text/javascript">
 
 function microAjax(B,A){this.bindFunction=function(E,D){return function(){return E.apply(D,[D])}};this.stateChange=function(D){if(this.request.readyState==4 ){this.callbackFunction(this.request.responseText)}};this.getRequest=function(){if(window.ActiveXObject){return new ActiveXObject("Microsoft.XMLHTTP")}else { if(window.XMLHttpRequest){return new XMLHttpRequest()}}return false};this.postBody=(arguments[2]||"");this.callbackFunction=A;this.url=B;this.request=this.getRequest();if(this.request){var C=this.request;C.onreadystatechange=this.bindFunction(this.stateChange,this);if(this.postBody!==""){C.open("POST",B,true);C.setRequestHeader("X-Requested-With","XMLHttpRequest");C.setRequestHeader("Content-Type","application/x-www-form-urlencoded; charset=UTF-8");C.setRequestHeader("Connection","close")}else{C.open("GET",B,true)}C.send(this.postBody)}};
+function microAjax2(B,A){this.bindFunction=function(E,D){return function(){return E.apply(D,[D])}};this.stateChange=function(D){if(this.request.readyState==4 ){this.callbackFunction(this.request.responseText)}};this.getRequest=function(){if(window.ActiveXObject){return new ActiveXObject("Microsoft.XMLHTTP")}else { if(window.XMLHttpRequest){return new XMLHttpRequest()}}return false};this.postBody=(arguments[2]||"");this.callbackFunction=A;this.url=B;this.request=this.getRequest();if(this.request){var C=this.request;C.onreadystatechange=this.bindFunction(this.stateChange,this);if(this.postBody!==""){C.open("POST",B,true);C.setRequestHeader("X-Requested-With","XMLHttpRequest");C.setRequestHeader("Content-Type","application/x-www-form-urlencoded; charset=UTF-8");C.setRequestHeader("Connection","close")}else{C.open("GET",B,true)}C.send(this.postBody)}};
 
 </script>
   <style>
@@ -229,11 +239,68 @@ finishedLoadinglong(corse);
                 markers.on('click',showMarker);
         }
 
-microAjax('mappaf.json',function (res) {
-var feat=JSON.parse(res);
-loadLayer(feat);
-  finishedLoading();
-} );
+
+        function get_random_color()
+        {
+            var letters = '0123456789ABCDEF'.split('');
+            var color = '#';
+            for (var i = 0; i < 6; i++ )
+            {
+               color += letters[Math.round(Math.random() * 15)];
+            }
+        return color;
+        }
+
+
+        function loadLayerR(url)
+        {
+          var text="";
+          var myStyle="";
+                var myLayer = L.geoJson(url,{
+                        onEachFeature:function onEachFeature(feature, layer) {
+
+
+                              if (feature.properties) {
+                                text =feature.properties.title;
+                                   console.log("color: "+feature.properties.color);
+                                   layer.setStyle({color :get_random_color()});
+                                   layer.bindPopup(text);
+                                   }
+
+
+
+
+                           },
+
+                        pointToLayer: function (feature, latlng) {
+                        var marker = new L.Marker(latlng, { icon: ico });
+
+                        markers[feature.properties.title] = marker;
+                        marker.bindPopup(text);
+
+                      //  marker.on('click',showMarker());
+                        return marker;
+                        }
+                }).addTo(map);
+
+              //  markers.addLayer(myLayer);
+               map.addLayer(myLayer);
+              //  markers.on('click',showMarker);
+        }
+        microAjax('mappaf.json',function (res) {
+        var feat=JSON.parse(res);
+        loadLayer(feat);
+        route();
+          finishedLoading();
+        } );
+  function route(){
+microAjax('mappafr.json',function (res1) {
+        var feat1=JSON.parse(res1);
+        loadLayerR(feat1);
+          finishedLoading();
+        } );
+
+}
 function convertTimestamp(timestamp) {
   var d = new Date(timestamp * 1000),	// Convert the passed timestamp to milliseconds
 		yyyy = d.getFullYear(),

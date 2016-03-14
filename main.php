@@ -61,6 +61,10 @@ function start($telegram,$update)
 
 		}elseif (strpos($text,'/') !== false ){
 
+			$content = array('chat_id' => $chat_id, 'text' => "Attendere per favore..",'disable_web_page_preview'=>true);
+			$telegram->sendMessage($content);
+
+		$text=str_replace("🏁 ","",$text);
 		$text=str_replace("/","",$text);
 		$text=str_replace("___","<",$text);
 		$text=str_replace("__","~",$text);
@@ -202,7 +206,7 @@ function location_manager($db,$telegram,$user_id,$chat_id,$location)
 			$lng=$location["longitude"];
 			$lat=$location["latitude"];
       $r=200;
-			$content = array('chat_id' => $chat_id, 'text' => "Attendere prego..", 'reply_to_message_id' =>$bot_request_message_id,'disable_web_page_preview'=>true);
+			$content = array('chat_id' => $chat_id, 'text' => "Attendere per favore..", 'reply_to_message_id' =>$bot_request_message_id,'disable_web_page_preview'=>true);
 			$telegram->sendMessage($content);
 			sleep(1);
 			//rispondo
@@ -220,12 +224,17 @@ function location_manager($db,$telegram,$user_id,$chat_id,$location)
 			      foreach($parsed_json->{'stops'} as $data=>$csv1){
 			         $count = $count+1;
 			      }
+
+
+
+
+
 			    //  $r10=$r/10;
 			  //    echo "Fermate più vicine rispetto a ".$lat."/".$lon." in raggio di ".$r." metri con relative linee urbane ed orari arrivi\n";
 			  //    $count=1;
 			    $IdFermata="";
 			//    echo $count;
-
+					$option=[];
 			  //  var_dump($parsed_json->{'stops'}[0]->{'name'});
 
 			  for ($i=0;$i<$count;$i++){
@@ -234,9 +243,12 @@ function location_manager($db,$telegram,$user_id,$chat_id,$location)
 			       $countl[$i] = $countl[$i]+1;
 			      }
 
+				//		array_push($option,$parsed_json->{'stops'}[$i]->{'onestop_id'});
+						$option[$i]=$parsed_json->{'stops'}[$i]->{'onestop_id'};
 						$onestop=str_replace("-","_",$parsed_json->{'stops'}[$i]->{'onestop_id'});
 						$onestop=str_replace("~","__",	$onestop);
 						$onestop=str_replace("<","___",	$onestop);
+
 
 
 			      //  echo $countl[$i];
@@ -260,6 +272,7 @@ function location_manager($db,$telegram,$user_id,$chat_id,$location)
 
  }
 
+
 if ($count >0){
 
 	$reply="Se vuoi vedere queste fermate su una mappa clicca qui:\n";
@@ -267,9 +280,10 @@ if ($count >0){
 	$content = array('chat_id' => $chat_id, 'text' => $reply, 'reply_markup' =>$forcehide,'disable_web_page_preview'=>true);
 	$telegram->sendMessage($content);
 
-	$forcehide=$telegram->buildKeyBoardHide(true);
-	$content = array('chat_id' => $chat_id, 'text' => "oppure clicca su ID Fermata per gli orari", 'reply_markup' =>$forcehide);
-	$telegram->sendMessage($content);
+//	$forcehide=$telegram->buildKeyBoardHide(true);
+//	$content = array('chat_id' => $chat_id, 'text' => "oppure clicca su ID Fermata per gli orari", 'reply_markup' =>$forcehide);
+//	$telegram->sendMessage($content);
+
 }else{
 	$content = array('chat_id' => $chat_id, 'text' => "Non ci sono fermate gestite", 'reply_markup' =>$forcehide,'disable_web_page_preview'=>true);
 	$telegram->sendMessage($content);
@@ -278,6 +292,15 @@ if ($count >0){
 
 	$log=$today. ",fermatelocation sent," .$chat_id. "\n";
 	$this->create_keyboard($telegram,$chat_id);
+	$optionf=array([]);
+	for ($i=0;$i<$count;$i++){
+		array_push($optionf,["🏁 /".$option[$i]]);
+
+	}
+			$keyb = $telegram->buildKeyBoard($optionf, $onetime=false);
+			$content = array('chat_id' => $chat_id, 'reply_markup' => $keyb, 'text' => "[Clicca su 🏁 della fermata]");
+			$telegram->sendMessage($content);
+
 	exit;
 
 	}

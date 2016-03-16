@@ -39,9 +39,13 @@ function start($telegram,$update)
 	$today = date("Y-m-d H:i:s");
 
 		if ($text == "/start") {
-		$reply = "Benvenuto. Invia la tua posizione cliccando sulla graffetta (📎) e ti indicherò le fermate più vicine nel raggio di 500 metri e relative linee ed orari, per le città di Napoli, Palermo, Roma e Trento.";
-		$reply .= "\nI dati dell'Aziende, le licenze opendata cc-by o iodl2.0, sono ricavabili su http://blog.spaziogis.it/2016/03/02/transiland-per-mettere-insieme-e-dare-vita-ai-dati-sui-trasporti/";
+		$reply = "Benvenuto. Invia la tua posizione cliccando sulla graffetta (📎) e ti indicherò le fermate più vicine nel raggio di 200 metri e relative linee ed orari, per le città di Napoli, Palermo, Roma e Trento.";
+		$reply .= "\nI dati dell'Aziende, le licenze opendata cc-by o iodl2.0, le API Transit.land, sono ricavabili su http://blog.spaziogis.it/2016/03/02/transiland-per-mettere-insieme-e-dare-vita-ai-dati-sui-trasporti/";
 		$reply .= "\nProgetto sviluppato da @Piersoft. Si declina ogni responsabilità sulla veridicità dei dati.";
+
+
+		$reply .= "\nWelcome. Send your location by clicking on the paperclip (📎) and will show you the nearest stops within 200 meters, and its lines and schedules, for the cities of Naples, Palermo, Rome and Trento. The API data of Transit.land, licenses OpenData cc-by or iodl2.0, can be found on http://blog.spaziogis.it/2016/03/02/transiland-per-mettere-insieme-e-dare-vita-ai-dati-sui-trasporti/ \nProject developed by @Piersoft. We accept no liability for the accuracy of data";
+
 
 		$content = array('chat_id' => $chat_id, 'text' => $reply,'disable_web_page_preview'=>true);
 		$telegram->sendMessage($content);
@@ -61,7 +65,7 @@ function start($telegram,$update)
 
 		}elseif (strpos($text,'/') !== false ){
 
-			$content = array('chat_id' => $chat_id, 'text' => "Attendere per favore..",'disable_web_page_preview'=>true);
+			$content = array('chat_id' => $chat_id, 'text' => "Attendere per favore.. / Please Wait..",'disable_web_page_preview'=>true);
 			$telegram->sendMessage($content);
 
 		$text=str_replace("🏁 ","",$text);
@@ -101,7 +105,7 @@ function start($telegram,$update)
 
 		$start=0;
 		if ($countl == 0){
-			$content = array('chat_id' => $chat_id, 'text' => "Non ci sono arrivi nella prossima ora",'disable_web_page_preview'=>true);
+			$content = array('chat_id' => $chat_id, 'text' => "Non ci sono arrivi nella prossima ora / There are no arrivals in the next hour ",'disable_web_page_preview'=>true);
 			$telegram->sendMessage($content);
 				$this->create_keyboard($telegram,$chat_id);
 			exit;
@@ -130,10 +134,10 @@ function start($telegram,$update)
 		  {
 
 		  if ( ($parsed_json1->{'schedule_stop_pairs'}[$l]->{'route_onestop_id'}) == $parsed_json->{'routes_serving_stop'}[$i]->{'route_onestop_id'}){
-					$temp_c1 .="Linea: ".$parsed_json->{'routes_serving_stop'}[$i]->{'route_name'}." arrivo: ";
+					$temp_c1 .="Linea: / Line:  ".$parsed_json->{'routes_serving_stop'}[$i]->{'route_name'}." arrivo: / arrive:  ";
 
 		  //    $temp_c1 .=$parsed_json1->{'schedule_stop_pairs'}[$l]->{'destination_arrival_time'};
-			$temp_c1 .=$distanza[$l]['orari']."\nproveniente da: ".$name;
+			$temp_c1 .=$distanza[$l]['orari']."\nproveniente da: / from:  ".$name;
 		  $temp_c1 .="\n";
 
 		      }
@@ -142,7 +146,7 @@ function start($telegram,$update)
 		}
 
 if ($start==1){
-	$content = array('chat_id' => $chat_id, 'text' => "Linee in arrivo nella prossima ora a ".$namedest."\n",'disable_web_page_preview'=>true);
+	$content = array('chat_id' => $chat_id, 'text' => "Linee in arrivo nella prossima ora a / incoming lines in the next hour to ".$namedest."\n",'disable_web_page_preview'=>true);
 	$telegram->sendMessage($content);
 }
 	$chunks = str_split($temp_c1, self::MAX_LENGTH);
@@ -177,7 +181,7 @@ if ($start==1){
 
 
 			$forcehide=$telegram->buildKeyBoardHide(true);
-			$content = array('chat_id' => $chat_id, 'text' => "Comando errato.\nInvia la tua posizione cliccando sulla graffetta (📎) in basso e, se vuoi, puoi cliccare due volte sulla mappa e spostare il Pin Rosso in un luogo di cui vuoi conoscere le fermate più vicine. Risposta entro 60 secondi.", 'reply_markup' =>$forcehide);
+			$content = array('chat_id' => $chat_id, 'text' => "Comando errato / Wrong command", 'reply_markup' =>$forcehide);
 			$telegram->sendMessage($content);
 			$this->create_keyboard($telegram,$chat_id);
 			exit;
@@ -193,7 +197,7 @@ if ($start==1){
  function create_keyboard($telegram, $chat_id)
 	{
 		$forcehide=$telegram->buildKeyBoardHide(true);
-		$content = array('chat_id' => $chat_id, 'text' => "Invia la tua posizione cliccando sulla graffetta (📎) in basso.", 'reply_markup' =>$forcehide);
+		$content = array('chat_id' => $chat_id, 'text' => "Invia la tua posizione cliccando sulla graffetta (📎) in basso\nSend your location by clicking on the paperclip (📎) down.", 'reply_markup' =>$forcehide);
 		$telegram->sendMessage($content);
 
 	}
@@ -206,9 +210,9 @@ function location_manager($db,$telegram,$user_id,$chat_id,$location)
 			$lng=$location["longitude"];
 			$lat=$location["latitude"];
       $r=200;
-			$content = array('chat_id' => $chat_id, 'text' => "Attendere per favore..", 'reply_to_message_id' =>$bot_request_message_id,'disable_web_page_preview'=>true);
+			$content = array('chat_id' => $chat_id, 'text' => "Attendere per favore.. / Please Wait..", 'disable_web_page_preview'=>true);
 			$telegram->sendMessage($content);
-			sleep(1);
+			//sleep(1);
 			//rispondo
 			$response=$telegram->getData();
 
@@ -253,11 +257,11 @@ function location_manager($db,$telegram,$user_id,$chat_id,$location)
 
 			      //  echo $countl[$i];
 			  $temp_c1 .="\n";
-			      $temp_c1 .="Fermata: ".$parsed_json->{'stops'}[$i]->{'name'};
-						$temp_c1 .="\nID Fermata: /".$onestop."";
+			      $temp_c1 .="Fermata: / Stop: ".$parsed_json->{'stops'}[$i]->{'name'};
+						$temp_c1 .="\nID Fermata: / ID Stop: /".$onestop."";
 
-						if ($parsed_json->{'stops'}[$i]->{'tags'}->{'wheelchair_boarding'} != null) $temp_c1 .="\nAccesso in carrozzina: ".$parsed_json->{'stops'}[$i]->{'tags'}->{'wheelchair_boarding'};
-			      $temp_c1 .="\nVisualizzala su :\nhttp://www.openstreetmap.org/?mlat=".$parsed_json->{'stops'}[$i]->{'geometry'}->{'coordinates'}[1]."&mlon=".$parsed_json->{'stops'}[$i]->{'geometry'}->{'coordinates'}[0]."#map=19/".$parsed_json->{'stops'}[$i]->{'geometry'}->{'coordinates'}[1]."/".$parsed_json->{'stops'}[$i]->{'geometry'}->{'coordinates'}[0];
+						if ($parsed_json->{'stops'}[$i]->{'tags'}->{'wheelchair_boarding'} != null) $temp_c1 .="\nAccesso in carrozzina: / Wheelchair boarding: ".$parsed_json->{'stops'}[$i]->{'tags'}->{'wheelchair_boarding'};
+			      $temp_c1 .="\nVisualizzala su : / See on:\nhttp://www.openstreetmap.org/?mlat=".$parsed_json->{'stops'}[$i]->{'geometry'}->{'coordinates'}[1]."&mlon=".$parsed_json->{'stops'}[$i]->{'geometry'}->{'coordinates'}[0]."#map=19/".$parsed_json->{'stops'}[$i]->{'geometry'}->{'coordinates'}[1]."/".$parsed_json->{'stops'}[$i]->{'geometry'}->{'coordinates'}[0];
 
 			  		$temp_c1 .="\n";
 
@@ -275,7 +279,8 @@ function location_manager($db,$telegram,$user_id,$chat_id,$location)
 
 if ($count >0){
 
-	$reply="Se vuoi vedere queste fermate su una mappa clicca qui:\n";
+	$reply ="Per vedere queste fermate su mappa:\n";
+	$reply.="To see these stops on the map: \n";
 	$reply .="http://www.piersoft.it/panarotre/locator.php?lon=".$lng."&lat=".$lat."&r=500";
 	$content = array('chat_id' => $chat_id, 'text' => $reply, 'reply_markup' =>$forcehide,'disable_web_page_preview'=>true);
 	$telegram->sendMessage($content);
@@ -285,7 +290,7 @@ if ($count >0){
 //	$telegram->sendMessage($content);
 
 }else{
-	$content = array('chat_id' => $chat_id, 'text' => "Non ci sono fermate gestite", 'reply_markup' =>$forcehide,'disable_web_page_preview'=>true);
+	$content = array('chat_id' => $chat_id, 'text' => "Non ci sono fermate gestite / There are stops managed", 'reply_markup' =>$forcehide,'disable_web_page_preview'=>true);
 	$telegram->sendMessage($content);
 }
 	$today = date("Y-m-d H:i:s");
@@ -298,7 +303,7 @@ if ($count >0){
 
 	}
 			$keyb = $telegram->buildKeyBoard($optionf, $onetime=false);
-			$content = array('chat_id' => $chat_id, 'reply_markup' => $keyb, 'text' => "[Clicca su 🏁 della fermata]");
+			$content = array('chat_id' => $chat_id, 'reply_markup' => $keyb, 'text' => "[Clicca su 🏁 della fermata / Click on the stop 🏁]");
 			$telegram->sendMessage($content);
 
 	exit;

@@ -6,13 +6,13 @@
             "geometry": {
                 "type": "Point",
                 "coordinates": [
-                    13.357354625,
-                    38.120969735
+                    14.234446459999,
+                    40.836713777007
                 ]
             },
             "properties": {
-                "name": "PIAZZA VERDI",
-                "id": "s-sqc2zgww8z-piazzaverdi"
+                "name": "COLONNA",
+                "id": "s-sr607fj5ne-colonna"
             }
         },
         {
@@ -20,13 +20,55 @@
             "geometry": {
                 "type": "Point",
                 "coordinates": [
-                    13.35638,
-                    38.120918335
+                    14.233652138718,
+                    40.837300349597
                 ]
             },
             "properties": {
-                "name": "PIGNATELLI ARAGONA",
-                "id": "s-sqc2zgty6n-pignatelliaragona"
+                "name": "AMEDEO-METROPOLITANA",
+                "id": "s-sr607fhws0-amedeo~metropolitana"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    14.231287376623,
+                    40.836553140802
+                ]
+            },
+            "properties": {
+                "name": "CRISPI-AMEDEO",
+                "id": "s-sr607f4fjj-crispi~amedeo"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    14.231001853681,
+                    40.836371071499
+                ]
+            },
+            "properties": {
+                "name": "CRISPI-NOBILE",
+                "id": "s-sr607f49n7-crispi~nobile"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    14.23292541734,
+                    40.836960410256
+                ]
+            },
+            "properties": {
+                "name": "CRISPI-AMEDEO",
+                "id": "s-sr607fhhe1-crispi~amedeo"
             }
         }
     ]

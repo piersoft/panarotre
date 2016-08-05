@@ -38,24 +38,35 @@ function start($telegram,$update)
 	date_default_timezone_set('Europe/Rome');
 	$today = date("Y-m-d H:i:s");
 
-		if ($text == "/start") {
-		$reply = "Benvenuto. Invia la tua posizione cliccando sulla graffetta (📎) e ti indicherò le fermate più vicine nel raggio di 200 metri e relative linee ed orari, per le città di Napoli, Palermo, Roma e Trento.";
+		if ($text == "/start" || $text == "©️info") {
+		$reply = "Benvenuto. Invia la tua posizione cliccando sulla graffetta (📎) e ti indicherò le fermate più vicine nel raggio di 200 metri e relative linee ed orari, per le città di Lecce, Napoli, Palermo, Roma e Trento.";
 		$reply .= "\nI dati dell'Aziende, le licenze opendata cc-by o iodl2.0, le API Transit.land, sono ricavabili su http://blog.spaziogis.it/2016/03/02/transiland-per-mettere-insieme-e-dare-vita-ai-dati-sui-trasporti/";
 		$reply .= "\nProgetto sviluppato da @Piersoft. Si declina ogni responsabilità sulla veridicità dei dati.";
 
 
-		$reply .= "\nWelcome. Send your location by clicking on the paperclip (📎) and will show you the nearest stops within 200 meters, and its lines and schedules, for the cities of Naples, Palermo, Rome and Trento. The API data of Transit.land, licenses OpenData cc-by or iodl2.0, can be found on http://blog.spaziogis.it/2016/03/02/transiland-per-mettere-insieme-e-dare-vita-ai-dati-sui-trasporti/ \nProject developed by @Piersoft. We accept no liability for the accuracy of data";
+		$reply .= "\nWelcome. Send your location by clicking on the paperclip (📎) and will show you the nearest stops within 200 meters, and its lines and schedules, for the cities of Lecce, Naples, Palermo, Rome and Trento and many others around the world. The API data of Transit.land, licenses OpenData cc-by or iodl2.0, can be found on http://blog.spaziogis.it/2016/03/02/transiland-per-mettere-insieme-e-dare-vita-ai-dati-sui-trasporti/ \nProject developed by @Piersoft. We accept no liability for the accuracy of data";
 
 
 		$content = array('chat_id' => $chat_id, 'text' => $reply,'disable_web_page_preview'=>true);
 		$telegram->sendMessage($content);
-
+/*
 		$forcehide=$telegram->buildKeyBoardHide(true);
 		$content = array('chat_id' => $chat_id, 'text' => "", 'reply_markup' =>$forcehide, 'reply_to_message_id' =>$bot_request_message_id);
 		$bot_request_message=$telegram->sendMessage($content);
+		*/
 		$log=$today. ",new chat started," .$chat_id. "\n";
 			$this->create_keyboard($telegram,$chat_id);
 			exit;
+	}elseif ($text == "/location" || $text == "🌐location") {
+
+		$option = array(array($telegram->buildKeyboardButton("Invia la tua posizione / send your location", false, true)) //this work
+											);
+	// Create a permanent custom keyboard
+	$keyb = $telegram->buildKeyBoard($option, $onetime=false);
+	$content = array('chat_id' => $chat_id, 'reply_markup' => $keyb, 'text' => "Attiva la localizzazione sul tuo smartphone / Turn on your GPS");
+	$telegram->sendMessage($content);
+	//	$this->create_keyboard($telegram,$chat_id);
+	exit;
 	}
 		elseif($location!=null)
 		{
@@ -146,7 +157,7 @@ function start($telegram,$update)
 		}
 
 if ($start==1){
-	$content = array('chat_id' => $chat_id, 'text' => "Linee in arrivo nella prossima ora a / incoming lines in the next hour to ".$namedest."\n",'disable_web_page_preview'=>true);
+	$content = array('chat_id' => $chat_id, 'text' => "Linee in arrivo nella prossima ora a / incoming lines in the next hour at ".$namedest."\n",'disable_web_page_preview'=>true);
 	$telegram->sendMessage($content);
 }
 	$chunks = str_split($temp_c1, self::MAX_LENGTH);
@@ -192,7 +203,15 @@ if ($start==1){
 
 }
 
+function create_keyboard($telegram, $chat_id)
+ {
+	 			$option = array(["🌐location","©️info"]);
+				$keyb = $telegram->buildKeyBoard($option, $onetime=false);
+				$content = array('chat_id' => $chat_id, 'reply_markup' => $keyb, 'text' => "[Invia la tua posizione]");
+				$telegram->sendMessage($content);
 
+ }
+/*
 // Crea la tastiera
  function create_keyboard($telegram, $chat_id)
 	{
@@ -202,7 +221,7 @@ if ($start==1){
 
 	}
 
-
+*/
 
 function location_manager($db,$telegram,$user_id,$chat_id,$location)
 	{
